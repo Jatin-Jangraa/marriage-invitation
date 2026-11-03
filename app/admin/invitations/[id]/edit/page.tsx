@@ -1,0 +1,2 @@
+import {redirect,notFound} from 'next/navigation';import {adminSession} from '@/lib/auth';import {connectDB} from '@/lib/db';import Wedding from '@/models/WeddingInvitation';import InvitationEditor from '@/components/admin/invitation-editor';
+export default async function EditInvitation({params}:{params:Promise<{id:string}>}){if(!await adminSession())redirect('/admin/login');const {id}=await params;try{await connectDB();const w=await Wedding.findById(id).lean() as any;if(!w)notFound();return <InvitationEditor initial={JSON.parse(JSON.stringify(w))}/>}catch{notFound()}}
