@@ -1,8 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { cloudinary } from '@/lib/cloudinary';
+import { connectDB } from '@/lib/db';
+import Wedding from '@/models/WeddingInvitation';
 
 export const runtime = 'nodejs';
+
+export async function GET(req: NextRequest) {
+  const account = await requireAdmin(req);
+  if (!account) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await connectDB();
+    const filter = account.role === 'admin' ? {} : { createdBy: account.sub };
+    const tracks = await Wedding.find({ ...filter, 'designSettings.musicUrl': { $type: 'string', $ne: '' } })
+      .select('designSettings.musicUrl').lean() as any[];
+    const unique = new Map<string, { url: string; label: string }>();
+    for (const item of tracks) {
+      const url = item.designSettings?.musicUrl;
+      if (!url || unique.has(url)) continue;
+      let label = 'Saved invitation music';
+      try { label = decodeURIComponent(new URL(url).pathname.split('/').pop() || label); } catch { /* keep fallback */ }
+      unique.set(url, { url, label });
+    }
+    return NextResponse.json({ tracks: [...unique.values()] });
+  } catch {
+    return NextResponse.json({ error: 'Could not load saved invitation music.' }, { status: 500 });
+  }
+}
 
 const allowedAudioTypes = new Set([
   'audio/mpeg',
