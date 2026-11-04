@@ -1,2 +1,31 @@
-'use client';import {useState} from 'react';import {useRouter} from 'next/navigation';import Link from 'next/link';import {LockKeyhole,ArrowLeft} from 'lucide-react';import {toast} from 'sonner';
-export default function Login(){const [busy,setBusy]=useState(false);const router=useRouter();async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);const f=new FormData(e.currentTarget);try{const r=await fetch('/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:f.get('email'),password:f.get('password')})});const j=await r.json();if(!r.ok)throw Error(j.error);toast.success('Welcome back');router.push('/admin')}catch(e:any){toast.error(e.message)}finally{setBusy(false)}}return <main className="grid min-h-screen bg-ivory md:grid-cols-2"><div className="hidden bg-burgundy p-12 text-ivory md:flex md:flex-col md:justify-between"><Link href="/" className="serif text-3xl">vivaha<span className="text-gold">.</span></Link><div className="max-w-md"><p className="mb-4 text-xs uppercase tracking-[.22em] text-gold">The invitation atelier</p><h1 className="serif text-6xl leading-tight">Every love story deserves a beautiful beginning.</h1></div><p className="text-xs tracking-wide text-[#d9c8b8]">A thoughtful space to create something unforgettable.</p></div><div className="flex items-center justify-center px-6 py-16"><div className="w-full max-w-sm"><Link href="/" className="mb-12 inline-flex items-center gap-2 text-sm text-[#87776c]"><ArrowLeft size={15}/> Back to home</Link><div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#f2e4d2] text-burgundy"><LockKeyhole size={20}/></div><h2 className="serif text-4xl text-burgundy">Welcome back</h2><p className="mt-2 text-sm text-[#827469]">Sign in to your invitation atelier.</p><form onSubmit={submit} className="mt-8 space-y-5"><label className="block text-sm text-ink">Email address<input name="email" type="email" autoComplete="username" required className="mt-2 w-full rounded-xl border border-[#e7d9c7] bg-white px-4 py-3 outline-none focus:border-gold"/></label><label className="block text-sm text-ink">Password<input name="password" type="password" autoComplete="current-password" required className="mt-2 w-full rounded-xl border border-[#e7d9c7] bg-white px-4 py-3 outline-none focus:border-gold"/></label><button disabled={busy} className="w-full rounded-full bg-burgundy py-3.5 text-sm text-white hover:bg-wine disabled:opacity-50">{busy?'Signing in…':'Sign in securely'}</button></form><p className="mt-6 text-xs leading-5 text-[#97887a]">Use your administrator credentials configured for this deployment.</p></div></div></main>}
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { ArrowLeft, LockKeyhole } from 'lucide-react';
+import { currentAccount } from '@/lib/auth';
+import GoogleLogin from '@/components/auth/google-login';
+
+export default async function AdminLogin() {
+  const account = await currentAccount();
+  if (account) redirect(account.role === 'admin' ? '/admin' : '/customer');
+
+  return (
+    <main className="grid min-h-screen bg-ivory md:grid-cols-2">
+      <div className="hidden bg-burgundy p-12 text-ivory md:flex md:flex-col md:justify-between">
+        <Link href="/" className="serif text-3xl">vivaha<span className="text-gold">.</span></Link>
+        <div className="max-w-md"><p className="mb-4 text-xs uppercase tracking-[.22em] text-gold">The invitation atelier</p><h1 className="serif text-6xl leading-tight">Every love story deserves a beautiful beginning.</h1></div>
+        <p className="text-xs tracking-wide text-[#d9c8b8]">Administrator access</p>
+      </div>
+      <div className="flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-sm">
+          <Link href="/" className="mb-12 inline-flex items-center gap-2 text-sm text-[#87776c]"><ArrowLeft size={15}/> Back to home</Link>
+          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#f2e4d2] text-burgundy"><LockKeyhole size={20}/></div>
+          <h2 className="serif text-4xl text-burgundy">Admin sign in</h2>
+          <p className="mt-2 text-sm text-[#827469]">Continue with the Google account assigned the admin role in MongoDB.</p>
+          <div className="mt-8"><GoogleLogin audience="admin"/></div>
+          <p className="mt-6 text-xs leading-5 text-[#97887a]">Your database role controls administrator access.</p>
+          <Link href="/login" className="mt-6 block text-center text-xs text-gold">Creating an invitation? Sign in as a customer</Link>
+        </div>
+      </div>
+    </main>
+  );
+}
