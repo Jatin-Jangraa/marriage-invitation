@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     if (parsed.data.status === 'published' && !parsed.data.weddingDetails.date) return NextResponse.json({ error: 'Add a wedding date before publishing.' }, { status: 400 });
     await connectDB();
     const body: any = parsed.data;
+    body.events = body.events.filter((event: any) => event.title?.trim());
     const root = body.slug;
     let slug = root;
     let suffix = 2;

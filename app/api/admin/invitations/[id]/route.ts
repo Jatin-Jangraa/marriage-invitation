@@ -37,7 +37,9 @@ export async function PUT(req: NextRequest, { params }: Context) {
     const { id } = await params;
     const existing = await ownedInvitation(id, account);
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    const item = await Wedding.findByIdAndUpdate(id, { ...parsed.data, ...(parsed.data.status === 'published' ? { publishedAt: new Date() } : {}) }, { new: true, runValidators: true });
+    const data: any = parsed.data;
+    data.events = data.events.filter((event: any) => event.title?.trim());
+    const item = await Wedding.findByIdAndUpdate(id, { ...data, ...(parsed.data.status === 'published' ? { publishedAt: new Date() } : {}) }, { new: true, runValidators: true });
     return item ? NextResponse.json({ item }) : NextResponse.json({ error: 'Not found' }, { status: 404 });
   } catch (e: any) {
     if (e.code === 11000) return NextResponse.json({ error: 'That invitation URL is already in use.' }, { status: 409 });
