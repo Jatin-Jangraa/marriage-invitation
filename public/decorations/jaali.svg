@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" fill="none">
+  <defs><pattern id="p" width="160" height="160" patternUnits="userSpaceOnUse"><g stroke="#9b7545" stroke-width="2" opacity=".38"><path d="M80 8 152 80 80 152 8 80 80 8Z"/><path d="M80 30c28 0 50 22 50 50s-22 50-50 50-50-22-50-50 22-50 50-50Z"/><path d="M80 8v22m0 100v22M8 80h22m100 0h22"/><path d="M43 43l18 18m38 38 18 18m0-74L99 61m-38 38-18 18"/><circle cx="80" cy="80" r="8" fill="#b28a47"/></g></pattern></defs>
+  <path fill="url(#p)" d="M0 0h900v1200H0z"/>
+</svg>
